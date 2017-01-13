@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/popularity_button"
+            android:title="@string/menu_popularity" />
+        <item
+            android:id="@+id/votes_button"
+            android:title="@string/menu_votes" />
+        <item
+            android:id="@+id/favs_button"
+            android:title="@string/menu_favs" />
+    </group>
+
+</menu>

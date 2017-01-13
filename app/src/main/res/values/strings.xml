@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Movies</string>
+    <string name="no_data_text">Something went wrong!</string>
+    <string name="no_favs_text">You have no favourites!</string>
+    <string name="menu_popularity">Popular Movies</string>
+    <string name="menu_votes">Sort by Votes</string>
+    <string name="menu_favs">Favourite Movies</string>
+</resources>
