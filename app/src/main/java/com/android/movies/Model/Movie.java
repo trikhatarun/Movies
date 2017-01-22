@@ -27,14 +27,16 @@ public class Movie implements Parcelable {
     private String mReleaseDate;
     private String mTrailerUrlsJson;
     private String mReviewJson;
+    private String mLandscapePosterUrl;
 
-    public Movie(String id, String imageUrl, String rating, String name, String synopsis, String releaseDate) {
+    public Movie(String id, String imageUrl, String rating, String name, String synopsis, String releaseDate, String landscapePosterUrl) {
         this.mId = id;
         this.mImageUrl = imageUrl;
         this.mRating = rating;
         this.mName = name;
         this.mSynopsis = synopsis;
         this.mReleaseDate = releaseDate;
+        this.mLandscapePosterUrl = landscapePosterUrl;
     }
 
     protected Movie(Parcel in) {
@@ -46,6 +48,7 @@ public class Movie implements Parcelable {
         mReleaseDate = in.readString();
         mTrailerUrlsJson = in.readString();
         mReviewJson = in.readString();
+        mLandscapePosterUrl = in.readString();
     }
 
     public String getmId() {
@@ -72,6 +75,21 @@ public class Movie implements Parcelable {
         return mReleaseDate;
     }
 
+    public String getmTrailerUrlsJson() {
+        return mTrailerUrlsJson;
+    }
+
+    public void setmTrailerUrlsJson(String mTrailerUrlsJson) {
+        this.mTrailerUrlsJson = mTrailerUrlsJson;
+    }
+
+    public String getmReviewJson() {
+        return mReviewJson;
+    }
+
+    public void setmReviewJson(String mReviewJson) {
+        this.mReviewJson = mReviewJson;
+    }
 
     @Override
     public int describeContents() {
@@ -88,13 +106,10 @@ public class Movie implements Parcelable {
         parcel.writeString(mReleaseDate);
         parcel.writeString(mReviewJson);
         parcel.writeString(mTrailerUrlsJson);
+        parcel.writeString(mLandscapePosterUrl);
     }
 
-    public void setmTrailerUrlsJson(String mTrailerUrlsJson) {
-        this.mTrailerUrlsJson = mTrailerUrlsJson;
-    }
-
-    public void setmReviewJson(String mReviewJson) {
-        this.mReviewJson = mReviewJson;
+    public String getmLandscapePosterUrl() {
+        return mLandscapePosterUrl;
     }
 }

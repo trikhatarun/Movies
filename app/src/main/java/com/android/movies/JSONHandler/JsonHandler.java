@@ -30,8 +30,10 @@ public class JsonHandler {
             String id = movieJson.getString("id");
 
             //getting poster link
-            String imagePostUrl = movieJson.getString("poster_path");
-            String imageUrl = imagePrefixUrl + imagePostUrl.substring(0);
+            String imageUrl = imagePrefixUrl + movieJson.getString("poster_path").substring(0);
+
+            //getting landscape poster
+            String landscapePoster = imagePrefixUrl + movieJson.getString("backdrop_path").substring(0);
 
             //getting movie title
             String title = movieJson.getString("original_title");
@@ -45,7 +47,7 @@ public class JsonHandler {
             //getting release date
             String releaseDate = movieJson.getString("release_date");
 
-            data.add(new Movie(id, imageUrl, rating, title, synopsis, releaseDate));
+            data.add(new Movie(id, imageUrl, rating, title, synopsis, releaseDate, landscapePoster));
         }
         return data;
     }

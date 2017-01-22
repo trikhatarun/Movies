@@ -56,7 +56,8 @@ public class NetworkRequestUtil {
     public static URL buildVideoURL(String id) {
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(id)
-                .appendPath(VIDEOS).build();
+                .appendPath(VIDEOS)
+                .appendQueryParameter(API_KEY_PARAM, key).build();
         try {
             return new URL(builtUri.toString());
         } catch (MalformedURLException e) {
@@ -69,7 +70,8 @@ public class NetworkRequestUtil {
     public static URL buildReviewURL(String id) {
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(id)
-                .appendPath(REVIEWS).build();
+                .appendPath(REVIEWS)
+                .appendQueryParameter(API_KEY_PARAM, key).build();
         try {
             return new URL(builtUri.toString());
         } catch (MalformedURLException e) {

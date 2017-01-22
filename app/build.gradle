@@ -3,7 +3,7 @@ apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.android.movies2"
         minSdkVersion 16
@@ -27,6 +27,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:recyclerview-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     compile 'com.jakewharton:butterknife:8.2.1'
     apt 'com.jakewharton:butterknife-compiler:8.2.1'

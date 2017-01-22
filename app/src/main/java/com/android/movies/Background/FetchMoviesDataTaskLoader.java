@@ -36,8 +36,9 @@ public class FetchMoviesDataTaskLoader extends AsyncTaskLoader<ArrayList<Movie>>
     @Override
     public ArrayList<Movie> loadInBackground() {
         URL url = NetworkRequestUtil.buildUrlMoviesData(mSortBy, mPage);
+        ArrayList<Movie> movieArrayList;
         try {
-            return JsonHandler.fetchJsonFromMovieData(NetworkRequestUtil.getResponseFromUrl(url));
+            movieArrayList = JsonHandler.fetchJsonFromMovieData(NetworkRequestUtil.getResponseFromUrl(url));
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -45,5 +46,6 @@ public class FetchMoviesDataTaskLoader extends AsyncTaskLoader<ArrayList<Movie>>
             e.printStackTrace();
             return null;
         }
+        return movieArrayList;
     }
 }

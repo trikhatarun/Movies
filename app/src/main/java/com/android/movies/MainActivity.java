@@ -2,6 +2,7 @@ package com.android.movies;
 
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -11,14 +12,12 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.android.movies.Adapters.MovieAdapter;
 import com.android.movies.Background.FetchMoviesDataTaskLoader;
@@ -199,7 +198,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onClick(Movie currentMovie) {
-        Log.v("Button: ", "clicked");
-        Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("currentMovie", currentMovie);
+        startActivity(intent);
     }
 }
