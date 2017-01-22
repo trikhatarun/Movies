@@ -2,12 +2,13 @@ package com.android.movies.JSONHandler;
 
 import com.android.movies.Model.Movie;
 import com.android.movies.Model.Review;
-import com.android.movies.Model.Trailer;
+import com.android.movies.Network.NetworkRequestUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -47,26 +48,30 @@ public class JsonHandler {
             //getting release date
             String releaseDate = movieJson.getString("release_date");
 
-            data.add(new Movie(id, imageUrl, rating, title, synopsis, releaseDate, landscapePoster));
+            String trailerJson = null, reviewJson = null;
+            try {
+                trailerJson = NetworkRequestUtil.getResponseFromUrl(NetworkRequestUtil.buildVideoURL(id));
+                reviewJson = NetworkRequestUtil.getResponseFromUrl(NetworkRequestUtil.buildReviewURL(id));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            data.add(new Movie(id, imageUrl, rating, title, synopsis, releaseDate, landscapePoster, trailerJson, reviewJson));
         }
         return data;
     }
 
     //Function to fetch videos links list from the json data
-    public static ArrayList<Trailer> getVideoLinksFromVideoData(String stringResponse) throws JSONException {
-        ArrayList<Trailer> vidsList = new ArrayList<>();
+    public static ArrayList<String> getVideoLinksFromVideoData(String stringResponse) throws JSONException {
+        ArrayList<String> vidsList = new ArrayList<>();
 
         JSONObject jsonResponse = new JSONObject(stringResponse);
         JSONArray result = jsonResponse.getJSONArray("results");
 
         for (int i = 0; i < result.length(); i++) {
             JSONObject vidJson = result.getJSONObject(i);
-
-            String title = vidJson.getString("name");
-            String site = vidJson.getString("site");
             String key = vidJson.getString("key");
-
-            vidsList.add(new Trailer(title, key, site));
+            vidsList.add(key);
         }
         return vidsList;
     }

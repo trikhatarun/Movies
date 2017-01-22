@@ -1,18 +1,15 @@
 package com.android.movies;
 
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 
-import com.android.movies.Background.FetchDetailsDataTaskLoader;
 import com.android.movies.JSONHandler.JsonHandler;
 import com.android.movies.Model.Movie;
 import com.android.movies.Model.Review;
-import com.android.movies.Model.Trailer;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -22,7 +19,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Bundle> {
+public class DetailActivity extends AppCompatActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -30,9 +27,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     CollapsingToolbarLayout collapsingToolbar;
     @BindView(R.id.poster)
     ImageView poster;
+    @BindView(R.id.appbar)
+    AppBarLayout appBarLayout;
 
     private Movie currentMovie;
-    private ArrayList<Trailer> trailerArrayList;
+    private ArrayList<String> trailerArrayList;
     private ArrayList<Review> reviewArrayList;
 
     @Override
@@ -52,49 +51,31 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        collapsingToolbar.setTitle("");
         Picasso.with(this).load(currentMovie.getmLandscapePosterUrl()).into(poster);
 
-        if (currentMovie.getmTrailerUrlsJson() == null || currentMovie.getmReviewJson() == null) {
-            LoaderManager loaderManager = getLoaderManager();
-            Loader<ArrayList<Movie>> listLoader = loaderManager.getLoader(LOADER_ID);
-            if (listLoader != null) {
-                loaderManager.restartLoader(LOADER_ID, null, this);
-            } else {
-                loaderManager.initLoader(LOADER_ID, null, this);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            boolean isShow = false;
+            int scrollRange = -1;
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    collapsingToolbar.setTitle(currentMovie.getmName());
+                    isShow = true;
+                } else if (isShow) {
+                    collapsingToolbar.setTitle(" ");
+                    isShow = false;
+                }
             }
-        } else {
-            try {
-                trailerArrayList = JsonHandler.getVideoLinksFromVideoData(currentMovie.getmTrailerUrlsJson());
-                reviewArrayList = JsonHandler.getReviewsFromJson(currentMovie.getmReviewJson());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public Loader<Bundle> onCreateLoader(int id, Bundle args) {
-        return new FetchDetailsDataTaskLoader(this, currentMovie.getmId());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Bundle> loader, Bundle data) {
-        String trailerJson = data.getString("trailerJson");
-        String reviewJson = data.getString("reviewJson");
-
-        currentMovie.setmTrailerUrlsJson(trailerJson);
-        currentMovie.setmReviewJson(reviewJson);
-
+        });
         try {
             trailerArrayList = JsonHandler.getVideoLinksFromVideoData(currentMovie.getmTrailerUrlsJson());
             reviewArrayList = JsonHandler.getReviewsFromJson(currentMovie.getmReviewJson());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Bundle> loader) {
     }
 }

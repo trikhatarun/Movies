@@ -29,7 +29,7 @@ public class Movie implements Parcelable {
     private String mReviewJson;
     private String mLandscapePosterUrl;
 
-    public Movie(String id, String imageUrl, String rating, String name, String synopsis, String releaseDate, String landscapePosterUrl) {
+    public Movie(String id, String imageUrl, String rating, String name, String synopsis, String releaseDate, String landscapePosterUrl, String trailerJson, String reviewJson) {
         this.mId = id;
         this.mImageUrl = imageUrl;
         this.mRating = rating;
@@ -37,6 +37,8 @@ public class Movie implements Parcelable {
         this.mSynopsis = synopsis;
         this.mReleaseDate = releaseDate;
         this.mLandscapePosterUrl = landscapePosterUrl;
+        this.mTrailerUrlsJson = trailerJson;
+        this.mReviewJson = reviewJson;
     }
 
     protected Movie(Parcel in) {
@@ -46,9 +48,9 @@ public class Movie implements Parcelable {
         mName = in.readString();
         mSynopsis = in.readString();
         mReleaseDate = in.readString();
+        mLandscapePosterUrl = in.readString();
         mTrailerUrlsJson = in.readString();
         mReviewJson = in.readString();
-        mLandscapePosterUrl = in.readString();
     }
 
     public String getmId() {
@@ -104,9 +106,9 @@ public class Movie implements Parcelable {
         parcel.writeString(mName);
         parcel.writeString(mSynopsis);
         parcel.writeString(mReleaseDate);
+        parcel.writeString(mLandscapePosterUrl);
         parcel.writeString(mReviewJson);
         parcel.writeString(mTrailerUrlsJson);
-        parcel.writeString(mLandscapePosterUrl);
     }
 
     public String getmLandscapePosterUrl() {
