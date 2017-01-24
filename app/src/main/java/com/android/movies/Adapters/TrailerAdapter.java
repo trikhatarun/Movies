@@ -26,10 +26,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     private ArrayList<String> TrailerKeyList;
     private Context mContext;
 
-    public TrailerAdapter(Context context, OnTrailerClickListener playTrailerListener, ArrayList<String> trailerKeyList) {
-        Log.v("Adapter: ", "Adapter initiated");
+    public TrailerAdapter(Context context, OnTrailerClickListener playTrailerListener) {
         this.playTrailerListener = playTrailerListener;
-        TrailerKeyList = trailerKeyList;
         mContext = context;
     }
 
@@ -50,6 +48,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         if (TrailerKeyList == null)
             return 0;
         return TrailerKeyList.size();
+    }
+
+    public void setTrailerKeyList(ArrayList<String> trailerList) {
+        TrailerKeyList = trailerList;
     }
 
     public interface OnTrailerClickListener {

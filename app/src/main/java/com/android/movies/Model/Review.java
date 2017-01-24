@@ -21,18 +21,15 @@ public class Review implements Parcelable {
     };
     private String mAuthor;
     private String mReviewContent;
-    private String mUrl;
 
-    public Review(String Author, String ReviewBody, String url) {
+    public Review(String Author, String ReviewBody) {
         this.mAuthor = Author;
         this.mReviewContent = ReviewBody;
-        mUrl = url;
     }
 
     protected Review(Parcel in) {
         mAuthor = in.readString();
         mReviewContent = in.readString();
-        mUrl = in.readString();
     }
 
     public String getmAuthor() {
@@ -43,9 +40,6 @@ public class Review implements Parcelable {
         return mReviewContent;
     }
 
-    public String getmUrl() {
-        return mUrl;
-    }
 
     @Override
     public int describeContents() {
@@ -56,6 +50,5 @@ public class Review implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(mAuthor);
         parcel.writeString(mReviewContent);
-        parcel.writeString(mUrl);
     }
 }

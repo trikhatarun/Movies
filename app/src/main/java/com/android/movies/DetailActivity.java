@@ -1,6 +1,8 @@
 package com.android.movies;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -10,13 +12,19 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.movies.Adapters.ReviewAdapter;
 import com.android.movies.Adapters.TrailerAdapter;
+import com.android.movies.Background.FetchDetailsDataTaskLoader;
 import com.android.movies.JSONHandler.JsonHandler;
 import com.android.movies.Model.Movie;
 import com.android.movies.Model.Review;
+import com.android.movies.Network.NetworkRequestUtil;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -26,8 +34,9 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class DetailActivity extends AppCompatActivity implements TrailerAdapter.OnTrailerClickListener {
+public class DetailActivity extends AppCompatActivity implements TrailerAdapter.OnTrailerClickListener, LoaderManager.LoaderCallbacks<Bundle> {
 
+    private final int LOADER_ID = 2240;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.collapsing_toolbar)
@@ -48,11 +57,17 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     TextView synopsis;
     @BindView(R.id.rv_trailers)
     RecyclerView trailersRecyclerView;
-
+    @BindView(R.id.rv_reviews)
+    RecyclerView reviewsRecyclerView;
+    @BindView(R.id.reviewLoadingBar)
+    ProgressBar reviewLoadingBar;
+    @BindView(R.id.trailerLoadingBar)
+    ProgressBar trailerLoadingBar;
     private Movie currentMovie;
     private ArrayList<String> trailerArrayList;
     private ArrayList<Review> reviewArrayList;
     private TrailerAdapter mTrailerAdapter;
+    private ReviewAdapter mReviewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,20 +92,20 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         releaseDate.setText(currentMovie.getmReleaseDate());
         synopsis.setText(currentMovie.getmSynopsis());
 
-        try {
-            trailerArrayList = JsonHandler.getVideoLinksFromVideoData(currentMovie.getmTrailerUrlsJson());
-            Log.v("trailerArraylist", currentMovie.getmTrailerUrlsJson());
-            reviewArrayList = JsonHandler.getReviewsFromJson(currentMovie.getmReviewJson());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        mTrailerAdapter = new TrailerAdapter(this, this);
 
-        mTrailerAdapter = new TrailerAdapter(this, this, trailerArrayList);
+        loadData();
 
         trailersRecyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         trailersRecyclerView.setLayoutManager(linearLayoutManager);
         trailersRecyclerView.setAdapter(mTrailerAdapter);
+
+        mReviewAdapter = new ReviewAdapter();
+        reviewsRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        reviewsRecyclerView.setLayoutManager(linearLayoutManager1);
+        reviewsRecyclerView.setAdapter(mReviewAdapter);
 
         //To show name only when bar is collapsed
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
@@ -113,9 +128,54 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         });
     }
 
+    private void loadData() {
+        if (NetworkRequestUtil.isNetworkAvailable(this)) {
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(LOADER_ID, null, this);
+        } else {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showRecyclerViews() {
+        trailersRecyclerView.setVisibility(View.VISIBLE);
+        reviewsRecyclerView.setVisibility(View.VISIBLE);
+        trailerLoadingBar.setVisibility(View.GONE);
+        reviewLoadingBar.setVisibility(View.GONE);
+    }
+
     @Override
     public void onClick(String key) {
         String trailerUrl = "http://www.youtube.com/watch?v=" + key;
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl)));
+    }
+
+    @Override
+    public Loader<Bundle> onCreateLoader(int id, Bundle args) {
+        return new FetchDetailsDataTaskLoader(this, currentMovie.getmId());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Bundle> loader, Bundle data) {
+        if (data != null) {
+            String trailerJson = data.getString("trailerJson");
+            String reviewJson = data.getString("reviewJson");
+            try {
+                trailerArrayList = JsonHandler.getVideoLinksFromVideoData(trailerJson);
+                reviewArrayList = JsonHandler.getReviewsFromJson(reviewJson);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.v("position", "going to show recyclerviews");
+        showRecyclerViews();
+        mReviewAdapter.setReviewsArrayList(reviewArrayList);
+        mTrailerAdapter.setTrailerKeyList(trailerArrayList);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Bundle> loader) {
+        mReviewAdapter.setReviewsArrayList(null);
+        mTrailerAdapter.setTrailerKeyList(null);
     }
 }

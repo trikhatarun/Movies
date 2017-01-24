@@ -1,12 +1,10 @@
 package com.android.movies;
 
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +20,7 @@ import android.widget.ProgressBar;
 import com.android.movies.Adapters.MovieAdapter;
 import com.android.movies.Background.FetchMoviesDataTaskLoader;
 import com.android.movies.Model.Movie;
+import com.android.movies.Network.NetworkRequestUtil;
 
 import java.util.ArrayList;
 
@@ -67,7 +66,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         preferences.registerOnSharedPreferenceChangeListener(listener);
 
         mRecyclerView.setHasFixedSize(true);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        GridLayoutManager gridLayoutManager;
+        int orientation = this.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            gridLayoutManager = new GridLayoutManager(this, 2);
+        } else {
+            gridLayoutManager = new GridLayoutManager(this, 3);
+        }
+
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mMovieAdapter = new MovieAdapter(this, this);
         mRecyclerView.setAdapter(mMovieAdapter);
@@ -119,13 +125,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return true;
     }
 
-    //Function to check internet availability, so that we do not start processing if internet is not available
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
     //Function to show view if there is an internet error
     private void showInternetError() {
         loadingbar.setVisibility(View.GONE);
@@ -171,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     //Function to load data and start loader
     public void loadData() {
         if (sort_popularity || sort_votes) {
-            if (isNetworkAvailable()) {
+            if (NetworkRequestUtil.isNetworkAvailable(this)) {
                 LoaderManager loaderManager = getLoaderManager();
                 loaderManager.initLoader(LOADER_ID, null, this);
             } else {

@@ -4,13 +4,11 @@ import android.util.Log;
 
 import com.android.movies.Model.Movie;
 import com.android.movies.Model.Review;
-import com.android.movies.Network.NetworkRequestUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -50,15 +48,7 @@ public class JsonHandler {
             //getting release date
             String releaseDate = movieJson.getString("release_date");
 
-            String trailerJson = null, reviewJson = null;
-            try {
-                trailerJson = NetworkRequestUtil.getResponseFromUrl(NetworkRequestUtil.buildVideoURL(id));
-                reviewJson = NetworkRequestUtil.getResponseFromUrl(NetworkRequestUtil.buildReviewURL(id));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            data.add(new Movie(id, imageUrl, rating, title, synopsis, releaseDate, landscapePoster, trailerJson, reviewJson));
+            data.add(new Movie(id, imageUrl, rating, title, synopsis, releaseDate, landscapePoster));
         }
         return data;
     }
@@ -93,9 +83,8 @@ public class JsonHandler {
 
             String author = reviewJson.getString("author");
             String content = reviewJson.getString("content");
-            String url = reviewJson.getString("url");
 
-            reviewArrayList.add(new Review(author, content, url));
+            reviewArrayList.add(new Review(author, content));
         }
         return reviewArrayList;
     }

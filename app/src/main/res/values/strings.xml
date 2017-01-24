@@ -12,4 +12,5 @@
     <string name="release_date_heading">Release Date: </string>
     <string name="synopsis_heading">Synopsis</string>
     <string name="trailer_heading">Trailers</string>
+    <string name="review_heading">Reviews</string>
 </resources>
