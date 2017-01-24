@@ -1,5 +1,7 @@
 package com.android.movies.JSONHandler;
 
+import android.util.Log;
+
 import com.android.movies.Model.Movie;
 import com.android.movies.Model.Review;
 import com.android.movies.Network.NetworkRequestUtil;
@@ -71,6 +73,9 @@ public class JsonHandler {
         for (int i = 0; i < result.length(); i++) {
             JSONObject vidJson = result.getJSONObject(i);
             String key = vidJson.getString("key");
+            if (key == null) {
+                Log.v("Error at " + i, stringResponse);
+            }
             vidsList.add(key);
         }
         return vidsList;

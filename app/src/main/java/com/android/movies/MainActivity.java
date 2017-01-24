@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     LinearLayout noFavsView;
     @BindView(R.id.loadingBar)
     ProgressBar loadingbar;
+    SharedPreferences preferences;
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
     private String sort_by;
     private MovieAdapter mMovieAdapter;
     private Boolean sort_popularity, sort_votes;
@@ -51,15 +53,30 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
         loadPreferences();
+        loadData();
+
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+                loadPreferences();
+                reloadData();
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(listener);
 
         mRecyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mMovieAdapter = new MovieAdapter(this, this);
         mRecyclerView.setAdapter(mMovieAdapter);
+    }
 
-        loadData();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        preferences.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
     @Override
@@ -80,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferences.edit();
 
         if (item.getItemId() == R.id.popularity_button) {
@@ -90,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 editor.putBoolean(getString(R.string.popularity_key), true);
                 editor.putBoolean(getString(R.string.votes_key), false);
                 editor.apply();
-                loadPreferences();
-                loadData();
             }
         } else {
             if (!sort_votes) {
@@ -100,8 +114,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 editor.putBoolean(getString(R.string.popularity_key), false);
                 editor.putBoolean(getString(R.string.votes_key), true);
                 editor.apply();
-                loadPreferences();
-                loadData();
             }
         }
         return true;
@@ -139,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     //Load preferences
     private void loadPreferences() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         sort_popularity = preferences.getBoolean(getString(R.string.popularity_key), true);
         sort_votes = preferences.getBoolean(getString(R.string.votes_key), false);
         if (sort_popularity) {
@@ -162,18 +173,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (sort_popularity || sort_votes) {
             if (isNetworkAvailable()) {
                 LoaderManager loaderManager = getLoaderManager();
-                Loader<ArrayList<Movie>> listLoader = loaderManager.getLoader(LOADER_ID);
-                if (listLoader != null) {
-                    loaderManager.restartLoader(LOADER_ID, null, this);
-                } else {
-                    loaderManager.initLoader(LOADER_ID, null, this);
-                }
+                loaderManager.initLoader(LOADER_ID, null, this);
             } else {
                 showInternetError();
             }
         } else {
 
         }
+    }
+
+    public void reloadData() {
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.restartLoader(LOADER_ID, null, this);
     }
 
     @Override

@@ -107,8 +107,9 @@ public class Movie implements Parcelable {
         parcel.writeString(mSynopsis);
         parcel.writeString(mReleaseDate);
         parcel.writeString(mLandscapePosterUrl);
-        parcel.writeString(mReviewJson);
         parcel.writeString(mTrailerUrlsJson);
+        parcel.writeString(mReviewJson);
+
     }
 
     public String getmLandscapePosterUrl() {

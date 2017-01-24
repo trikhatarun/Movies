@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class NetworkRequestUtil {
 
     private static final String TAG = NetworkRequestUtil.class.getSimpleName();
-    private static final String BASE_URL = "https://api.themoviedb.org/3/movie";
+    private static final String BASE_URL = "http://api.themoviedb.org/3/movie";
     private static final String API_KEY_PARAM = "api_key";
     private static final String PAGE_PARAM = "page";
     private static final String VOTES_PATH = "top_rated";
