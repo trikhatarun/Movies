@@ -1,10 +1,15 @@
 package com.android.movies;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -21,22 +26,26 @@ import android.widget.Toast;
 import com.android.movies.Adapters.ReviewAdapter;
 import com.android.movies.Adapters.TrailerAdapter;
 import com.android.movies.Background.FetchDetailsDataTaskLoader;
+import com.android.movies.Data.MovieContract.MovieEntry;
 import com.android.movies.JSONHandler.JsonHandler;
 import com.android.movies.Model.Movie;
 import com.android.movies.Model.Review;
 import com.android.movies.Network.NetworkRequestUtil;
+import com.like.LikeButton;
+import com.like.OnLikeListener;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity implements TrailerAdapter.OnTrailerClickListener, LoaderManager.LoaderCallbacks<Bundle> {
 
-    private final int LOADER_ID = 2240;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.collapsing_toolbar)
@@ -63,11 +72,16 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     ProgressBar reviewLoadingBar;
     @BindView(R.id.trailerLoadingBar)
     ProgressBar trailerLoadingBar;
+    @BindView(R.id.likeButton)
+    LikeButton likeButton;
+
     private Movie currentMovie;
     private ArrayList<String> trailerArrayList;
     private ArrayList<Review> reviewArrayList;
     private TrailerAdapter mTrailerAdapter;
     private ReviewAdapter mReviewAdapter;
+    private SharedPreferences preferences;
+    private Set<String> favsIdSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +94,9 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         Bundle dataPack = getIntent().getExtras();
 
         currentMovie = (Movie) dataPack.get("currentMovie");
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        favsIdSet = preferences.getStringSet(getString(R.string.cache_set_key), new HashSet<String>());
+        Log.v("facIdser: ", favsIdSet.toString());
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -93,17 +110,42 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         synopsis.setText(currentMovie.getmSynopsis());
 
         mTrailerAdapter = new TrailerAdapter(this, this);
+        mReviewAdapter = new ReviewAdapter();
 
-        loadData();
+        if (favsIdSet.contains(currentMovie.getmId())) {
+            likeButton.setLiked(true);
+            String projection[] = {
+                    MovieEntry.COLUMN_REVIEW_JSON,
+                    MovieEntry.COLUMN_TRAILER_JSON
+            };
+            Cursor c = getContentResolver().query(ContentUris.withAppendedId(MovieEntry.CONTENT_URI, 1), projection, MovieEntry.COLUMN_MOVIE_ID + "=?", new String[]{currentMovie.getmId()}, null);
+            if (c != null) {
+                try {
+                    c.moveToFirst();
+                    trailerArrayList = JsonHandler.getVideoLinksFromVideoData(c.getString(c.getColumnIndex(MovieEntry.COLUMN_TRAILER_JSON)));
+                    reviewArrayList = JsonHandler.getReviewsFromJson(c.getString(c.getColumnIndex(MovieEntry.COLUMN_REVIEW_JSON)));
+                    showRecyclerViews();
+                    if (!reviewArrayList.isEmpty() || !(reviewArrayList == null)) {
+                        mReviewAdapter.setReviewsArrayList(reviewArrayList);
+                    }
+                    mTrailerAdapter.setTrailerKeyList(trailerArrayList);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                c.close();
+            }
+        } else {
+            loadData();
+        }
 
         trailersRecyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         trailersRecyclerView.setLayoutManager(linearLayoutManager);
         trailersRecyclerView.setAdapter(mTrailerAdapter);
 
-        mReviewAdapter = new ReviewAdapter();
         reviewsRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         reviewsRecyclerView.setLayoutManager(linearLayoutManager1);
         reviewsRecyclerView.setAdapter(mReviewAdapter);
 
@@ -126,11 +168,55 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
                 }
             }
         });
+        likeButton.setOnLikeListener(new OnLikeListener() {
+            @Override
+            public void liked(LikeButton likeButton) {
+                ContentValues values = new ContentValues();
+                values.put(MovieEntry.COLUMN_MOVIE_ID, currentMovie.getmId());
+                values.put(MovieEntry.COLUMN_MOVIE_NAME, currentMovie.getmName());
+                values.put(MovieEntry.COLUMN_RATING, currentMovie.getmRating());
+                values.put(MovieEntry.COLUMN_RELEASE_DATE, currentMovie.getmReleaseDate());
+                values.put(MovieEntry.COLUMN_MOVIE_POSTER_URL, currentMovie.getmImageUrl());
+                values.put(MovieEntry.COLUMN_MOVIE_BACKDROP_URL, currentMovie.getmLandscapePosterUrl());
+                values.put(MovieEntry.COLUMN_SYNOPSIS, currentMovie.getmSynopsis());
+                values.put(MovieEntry.COLUMN_REVIEW_JSON, currentMovie.getmReviewJson());
+                values.put(MovieEntry.COLUMN_TRAILER_JSON, currentMovie.getmTrailerUrlsJson());
+
+                Uri uri = getContentResolver().insert(MovieEntry.CONTENT_URI, values);
+                if (uri == null) {
+                    Toast.makeText(DetailActivity.this, "Failed to add to Favourites", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(DetailActivity.this, "Added to favourites", Toast.LENGTH_SHORT).show();
+                    favsIdSet.add(currentMovie.getmId());
+                    updatePreference();
+                }
+            }
+
+            @Override
+            public void unLiked(LikeButton likeButton) {
+                int deleteResponse = getContentResolver().delete(MovieEntry.CONTENT_URI, MovieEntry.COLUMN_MOVIE_ID + "=?", new String[]{currentMovie.getmId()});
+                if (deleteResponse > 0) {
+                    Toast.makeText(DetailActivity.this, "Removed from favourites", Toast.LENGTH_SHORT).show();
+                    favsIdSet.remove(currentMovie.getmId());
+                    updatePreference();
+                } else {
+                    Toast.makeText(DetailActivity.this, "Failed to remove from favourites", Toast.LENGTH_SHORT).show();
+                }
+                favsIdSet.remove(currentMovie.getmId());
+            }
+        });
+    }
+
+    private void updatePreference() {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putStringSet(getString(R.string.cache_set_key), favsIdSet);
+        editor.apply();
     }
 
     private void loadData() {
         if (NetworkRequestUtil.isNetworkAvailable(this)) {
             LoaderManager loaderManager = getLoaderManager();
+            int LOADER_ID = 2240;
             loaderManager.initLoader(LOADER_ID, null, this);
         } else {
             Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
@@ -160,14 +246,18 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         if (data != null) {
             String trailerJson = data.getString("trailerJson");
             String reviewJson = data.getString("reviewJson");
+            currentMovie.setmTrailerUrlsJson(trailerJson);
             try {
                 trailerArrayList = JsonHandler.getVideoLinksFromVideoData(trailerJson);
                 reviewArrayList = JsonHandler.getReviewsFromJson(reviewJson);
+                if (reviewJson == null) {
+                    currentMovie.setmReviewJson(null);
+                } else
+                    currentMovie.setmReviewJson(reviewJson);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-        Log.v("position", "going to show recyclerviews");
         showRecyclerViews();
         mReviewAdapter.setReviewsArrayList(reviewArrayList);
         mTrailerAdapter.setTrailerKeyList(trailerArrayList);

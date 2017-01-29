@@ -34,5 +34,6 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.github.AndroidDeveloperLB:AutoFitTextView:4'
+    compile 'com.github.jd-alexander:LikeButton:0.2.0'
     testCompile 'junit:junit:4.12'
 }

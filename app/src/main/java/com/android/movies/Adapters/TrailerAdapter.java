@@ -52,19 +52,20 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
     public void setTrailerKeyList(ArrayList<String> trailerList) {
         TrailerKeyList = trailerList;
+        notifyDataSetChanged();
     }
 
     public interface OnTrailerClickListener {
         void onClick(String key);
     }
 
-    public class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.trailer_thumbnail)
         ImageView trailerThumbnail;
         @BindView(R.id.trailer_play)
         ImageButton playButton;
 
-        public TrailerViewHolder(View itemView) {
+        TrailerViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             playButton.setOnClickListener(this);

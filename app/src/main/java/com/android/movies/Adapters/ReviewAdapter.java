@@ -43,15 +43,16 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
     public void setReviewsArrayList(ArrayList<Review> reviewsList) {
         reviewsArrayList = reviewsList;
+        notifyDataSetChanged();
     }
 
-    public class ReviewViewHolder extends RecyclerView.ViewHolder {
+    class ReviewViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.author)
         TextView reviewAuthor;
         @BindView(R.id.review_content)
         TextView reviewContent;
 
-        public ReviewViewHolder(View itemView) {
+        ReviewViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

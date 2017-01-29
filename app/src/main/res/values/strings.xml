@@ -13,4 +13,5 @@
     <string name="synopsis_heading">Synopsis</string>
     <string name="trailer_heading">Trailers</string>
     <string name="review_heading">Reviews</string>
+    <string name="cache_set_key">favs_set</string>
 </resources>
