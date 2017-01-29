@@ -7,6 +7,7 @@
     <string name="menu_favs">Favourite Movies</string>
     <string name="popularity_key" translatable="false">popularity</string>
     <string name="votes_key" translatable="false">votes</string>
+    <string name="favs_key" translatable="false">favs</string>
     <string name="rating_heading">Rating: </string>
     <string name="rating_text_string">%1$s/10</string>
     <string name="release_date_heading">Release Date: </string>

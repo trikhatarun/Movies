@@ -9,5 +9,8 @@
         <item
             android:id="@+id/votes_button"
             android:title="@string/menu_votes" />
+        <item
+            android:id="@+id/favs_button"
+            android:title="@string/menu_favs" />
     </group>
 </menu>

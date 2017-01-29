@@ -66,6 +66,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="16dp"
         android:layout_marginStart="8dp"
+        android:visibility="invisible"
         app:icon_size="28dp"
         app:icon_type="heart"
         app:layout_constraintBottom_toTopOf="@+id/view2"

@@ -42,9 +42,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     private String sort_by;
     private MovieAdapter mMovieAdapter;
-    private Boolean sort_popularity, sort_votes;
+    private Boolean sort_popularity, sort_votes, sort_favs;
     private MenuItem popButton;
     private MenuItem votButton;
+    private MenuItem favButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,12 +92,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         menuInflater.inflate(R.menu.filter_menu, menu);
         popButton = menu.findItem(R.id.popularity_button);
         votButton = menu.findItem(R.id.votes_button);
+        favButton = menu.findItem(R.id.favs_button);
         if (sort_popularity) {
             popButton.setChecked(true);
             votButton.setChecked(false);
-        } else {
+            favButton.setChecked(false);
+        } else if (sort_votes) {
             votButton.setChecked(true);
             popButton.setChecked(false);
+            favButton.setChecked(false);
+        } else {
+            favButton.setChecked(true);
+            popButton.setChecked(false);
+            votButton.setChecked(false);
         }
         return true;
     }
@@ -109,16 +117,30 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             if (!sort_popularity) {
                 popButton.setChecked(true);
                 votButton.setChecked(false);
+                favButton.setChecked(false);
                 editor.putBoolean(getString(R.string.popularity_key), true);
                 editor.putBoolean(getString(R.string.votes_key), false);
+                editor.putBoolean(getString(R.string.favs_key), false);
                 editor.apply();
             }
-        } else {
+        } else if (item.getItemId() == R.id.votes_button) {
             if (!sort_votes) {
                 votButton.setChecked(true);
                 popButton.setChecked(false);
+                favButton.setChecked(false);
                 editor.putBoolean(getString(R.string.popularity_key), false);
                 editor.putBoolean(getString(R.string.votes_key), true);
+                editor.putBoolean(getString(R.string.favs_key), false);
+                editor.apply();
+            }
+        } else {
+            if (!sort_favs) {
+                favButton.setChecked(true);
+                popButton.setChecked(false);
+                votButton.setChecked(false);
+                editor.putBoolean(getString(R.string.favs_key), true);
+                editor.putBoolean(getString(R.string.popularity_key), false);
+                editor.putBoolean(getString(R.string.votes_key), false);
                 editor.apply();
             }
         }
@@ -152,10 +174,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void loadPreferences() {
         sort_popularity = preferences.getBoolean(getString(R.string.popularity_key), true);
         sort_votes = preferences.getBoolean(getString(R.string.votes_key), false);
+        sort_favs = preferences.getBoolean(getString(R.string.favs_key), false);
         if (sort_popularity) {
             sort_by = getString(R.string.popularity_key);
-        } else
+        } else if (sort_votes)
             sort_by = getString(R.string.votes_key);
+        else
+            sort_by = getString(R.string.favs_key);
         setLabel();
     }
 
@@ -163,8 +188,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void setLabel() {
         if (sort_popularity) {
             setTitle(getString(R.string.menu_popularity));
-        } else
+        } else if (sort_votes)
             setTitle(getString(R.string.menu_votes));
+        else
+            setTitle(getString(R.string.menu_favs));
     }
 
     //Function to load data and start loader
@@ -177,7 +204,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 showInternetError();
             }
         } else {
-
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(LOADER_ID, null, this);
         }
     }
 
@@ -198,6 +226,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (data != null) {
             showRecyclerView();
             mMovieAdapter.setMovieList(data);
+        } else {
+            showNoFavsView();
         }
     }
 

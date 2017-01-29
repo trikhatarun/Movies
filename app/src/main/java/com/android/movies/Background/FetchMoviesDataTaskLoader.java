@@ -2,10 +2,13 @@ package com.android.movies.Background;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.database.Cursor;
 
+import com.android.movies.Data.MovieContract.MovieEntry;
 import com.android.movies.JSONHandler.JsonHandler;
 import com.android.movies.Model.Movie;
 import com.android.movies.Network.NetworkRequestUtil;
+import com.android.movies.R;
 
 import org.json.JSONException;
 
@@ -35,16 +38,34 @@ public class FetchMoviesDataTaskLoader extends AsyncTaskLoader<ArrayList<Movie>>
 
     @Override
     public ArrayList<Movie> loadInBackground() {
-        URL url = NetworkRequestUtil.buildUrlMoviesData(mSortBy, mPage);
-        ArrayList<Movie> movieArrayList;
-        try {
-            movieArrayList = JsonHandler.fetchJsonFromMovieData(NetworkRequestUtil.getResponseFromUrl(url));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
+        ArrayList<Movie> movieArrayList = null;
+        if (mSortBy.equals(getContext().getString(R.string.favs_key))) {
+            movieArrayList = new ArrayList<>();
+            Cursor cursor = getContext().getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
+            while (cursor.moveToNext()) {
+                String id, imageUrl, rating, name, synopsis, releaseDate, landscapePoster, trailerJson, reviewJson;
+                id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_ID));
+                imageUrl = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_POSTER_URL));
+                rating = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RATING));
+                name = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_NAME));
+                synopsis = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_SYNOPSIS));
+                releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
+                landscapePoster = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_BACKDROP_URL));
+                trailerJson = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TRAILER_JSON));
+                reviewJson = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_REVIEW_JSON));
+                movieArrayList.add(new Movie(id, imageUrl, rating, name, synopsis, releaseDate, landscapePoster, trailerJson, reviewJson));
+            }
+        } else {
+            URL url = NetworkRequestUtil.buildUrlMoviesData(mSortBy, mPage);
+            try {
+                movieArrayList = JsonHandler.fetchJsonFromMovieData(NetworkRequestUtil.getResponseFromUrl(url));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
         return movieArrayList;
     }

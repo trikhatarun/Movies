@@ -128,7 +128,8 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
                     if (!reviewArrayList.isEmpty() || !(reviewArrayList == null)) {
                         mReviewAdapter.setReviewsArrayList(reviewArrayList);
                     }
-                    mTrailerAdapter.setTrailerKeyList(trailerArrayList);
+                    if (!trailerArrayList.isEmpty() || !(trailerArrayList == null))
+                        mTrailerAdapter.setTrailerKeyList(trailerArrayList);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -228,6 +229,7 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         reviewsRecyclerView.setVisibility(View.VISIBLE);
         trailerLoadingBar.setVisibility(View.GONE);
         reviewLoadingBar.setVisibility(View.GONE);
+        likeButton.setVisibility(View.VISIBLE);
     }
 
     @Override

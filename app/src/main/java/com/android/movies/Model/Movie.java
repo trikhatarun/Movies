@@ -39,6 +39,18 @@ public class Movie implements Parcelable {
         this.mLandscapePosterUrl = landscapePosterUrl;
     }
 
+    public Movie(String id, String imageUrl, String rating, String name, String synopsis, String releaseDate, String landscapePosterUrl, String trailerJson, String reviewJson) {
+        this.mId = id;
+        this.mImageUrl = imageUrl;
+        this.mRating = rating;
+        this.mName = name;
+        this.mSynopsis = synopsis;
+        this.mReleaseDate = releaseDate;
+        this.mLandscapePosterUrl = landscapePosterUrl;
+        this.mTrailerUrlsJson = trailerJson;
+        this.mReviewJson = reviewJson;
+    }
+
     protected Movie(Parcel in) {
         mId = in.readString();
         mImageUrl = in.readString();
