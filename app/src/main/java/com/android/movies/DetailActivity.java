@@ -17,6 +17,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -230,6 +233,28 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         trailerLoadingBar.setVisibility(View.GONE);
         reviewLoadingBar.setVisibility(View.GONE);
         likeButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = new MenuInflater(this);
+        menuInflater.inflate(R.menu.share_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_item_share) {
+            Intent shareIntent =
+                    new Intent(android.content.Intent.ACTION_SEND);
+            String trailerUrl = "http://www.youtube.com/watch?v=" + trailerArrayList.get(0);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, trailerUrl);
+            startActivity(Intent.createChooser(shareIntent,
+                    "Share Trailer"));
+
+        }
+        return true;
     }
 
     @Override
