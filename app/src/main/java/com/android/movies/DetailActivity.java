@@ -12,11 +12,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -99,7 +99,6 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         currentMovie = (Movie) dataPack.get("currentMovie");
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         favsIdSet = preferences.getStringSet(getString(R.string.cache_set_key), new HashSet<String>());
-        Log.v("facIdser: ", favsIdSet.toString());
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -253,6 +252,8 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
             startActivity(Intent.createChooser(shareIntent,
                     "Share Trailer"));
 
+        } else {
+            NavUtils.navigateUpFromSameTask(this);
         }
         return true;
     }
